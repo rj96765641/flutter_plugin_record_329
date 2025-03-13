@@ -1,78 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin_record_example/path_provider_screen.dart';
-import 'package:flutter_plugin_record_example/record_mp3_screen.dart';
-import 'package:flutter_plugin_record_example/record_screen.dart';
-import 'package:flutter_plugin_record_example/wechat_record_screen.dart';
+import 'package:flutter_plugin_record_329_example/path_provider_screen.dart';
+import 'package:flutter_plugin_record_329_example/record_mp3_screen.dart';
+import 'package:flutter_plugin_record_329_example/record_screen.dart';
+import 'package:flutter_plugin_record_329_example/wechat_record_screen.dart';
 
-void main() => runApp(MyApp());
+/// 应用程序入口
+void main() => runApp(const MyApp());
 
+/// 应用程序根组件
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Demo',
-      theme: new ThemeData(
-        primarySwatch: Colors.blue,
+    return MaterialApp(
+      title: '录音插件示例',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: '录音插件示例'),
       routes: {
-        "RecordScreen": (BuildContext context) => new RecordScreen(),
-        "RecordMp3Screen": (BuildContext context) => new RecordMp3Screen(),
-        "WeChatRecordScreen": (BuildContext context) =>
-            new WeChatRecordScreen(),
-        "PathProviderScreen": (BuildContext context) =>
-            new PathProviderScreen(),
+        'RecordScreen': (context) => RecordScreen(),
+        'RecordMp3Screen': (context) => RecordMp3Screen(),
+        'WeChatRecordScreen': (context) => WeChatRecordScreen(),
+        'PathProviderScreen': (context) => PathProviderScreen(),
       },
     );
   }
 }
 
+/// 主页面组件
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
+/// 主页面状态类
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("flutter版微信语音录制实现"),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('录音插件示例'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: new Center(
-        child: new Column(
+      body: Center(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new FlatButton(
-                onPressed: () {
-                  Navigator.pushNamed<dynamic>(context, "RecordScreen");
-                },
-                child: new Text("进入语音录制界面")),
-            new FlatButton(
-                onPressed: () {
-                  Navigator.pushNamed<dynamic>(context, "RecordMp3Screen");
-                },
-                child: new Text("进入录制mp3模式")),
-            new FlatButton(
-                onPressed: () {
-                  Navigator.pushNamed<dynamic>(context, "WeChatRecordScreen");
-                },
-                child: new Text("进入仿微信录制界面")),
-            new FlatButton(
-                onPressed: () {
-                  Navigator.pushNamed<dynamic>(context, "PathProviderScreen");
-                },
-                child: new Text("进入文件路径获取界面")),
+            _buildNavigationButton(
+              context,
+              'RecordScreen',
+              '进入语音录制界面',
+            ),
+            _buildNavigationButton(
+              context,
+              'RecordMp3Screen',
+              '进入录制MP3模式',
+            ),
+            _buildNavigationButton(
+              context,
+              'WeChatRecordScreen',
+              '进入仿微信录制界面',
+            ),
+            _buildNavigationButton(
+              context,
+              'PathProviderScreen',
+              '进入文件路径获取界面',
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 构建导航按钮
+  Widget _buildNavigationButton(BuildContext context, String route, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextButton(
+        onPressed: () => Navigator.pushNamed(context, route),
+        child: Text(label),
       ),
     );
   }

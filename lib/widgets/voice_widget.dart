@@ -1,13 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin_record/flutter_plugin_record.dart';
-import 'package:flutter_plugin_record/utils/common_toast.dart';
+import 'package:flutter_plugin_record_329/flutter_plugin_record_329.dart';
 
-import 'custom_overlay.dart';
-
-typedef startRecord = Future Function();
-typedef stopRecord = Future Function();
 
 class VoiceWidget extends StatefulWidget {
   final Function? startRecord;
@@ -32,7 +27,7 @@ class VoiceWidget extends StatefulWidget {
 
 class _VoiceWidgetState extends State<VoiceWidget> {
   // 倒计时总时长
-  int _countTotal = 12;
+  final int _countTotal = 12;
   double starty = 0.0;
   double offset = 0.0;
   bool isUp = false;
@@ -42,7 +37,7 @@ class _VoiceWidgetState extends State<VoiceWidget> {
 
   ///默认隐藏状态
   bool voiceState = true;
-  FlutterPluginRecord? recordPlugin;
+  FlutterPluginRecord329? recordPlugin;
   Timer? _timer;
   int _count = 0;
   OverlayEntry? overlayEntry;
@@ -50,16 +45,16 @@ class _VoiceWidgetState extends State<VoiceWidget> {
   @override
   void initState() {
     super.initState();
-    recordPlugin = new FlutterPluginRecord();
+    recordPlugin = new FlutterPluginRecord329();
 
     _init();
 
     ///初始化方法的监听
     recordPlugin?.responseFromInit.listen((data) {
       if (data) {
-        print("初始化成功");
+        debugPrint("初始化成功");
       } else {
-        print("初始化失败");
+        debugPrint("初始化失败");
       }
     });
 
@@ -67,11 +62,10 @@ class _VoiceWidgetState extends State<VoiceWidget> {
     recordPlugin?.response.listen((data) {
       if (data.msg == "onStop") {
         ///结束录制时会返回录制文件的地址方便上传服务器
-        print("onStop  " + data.path!);
-        if (widget.stopRecord != null)
-          widget.stopRecord!(data.path, data.audioTimeLength);
+        debugPrint("onStop  ${data.path}");
+        widget.stopRecord?.call(data.path, data.audioTimeLength);
       } else if (data.msg == "onStart") {
-        print("onStart --");
+        debugPrint("onStart --");
         if (widget.startRecord != null) widget.startRecord!();
       }
     });
@@ -102,7 +96,7 @@ class _VoiceWidgetState extends State<VoiceWidget> {
         }
       });
 
-      print("振幅大小   " + voiceData.toString() + "  " + voiceIco);
+      debugPrint("振幅大小   $voiceData  $voiceIco");
     });
   }
 
@@ -128,11 +122,11 @@ class _VoiceWidgetState extends State<VoiceWidget> {
                           ),
                         ),
                       )
-                    : new Image.asset(
+                    : Image.asset(
                         voiceIco,
                         width: 100,
                         height: 100,
-                        package: 'flutter_plugin_record',
+                        package: 'flutter_plugin_record_329',
                       ),
               ),
               Container(
@@ -150,7 +144,7 @@ class _VoiceWidgetState extends State<VoiceWidget> {
           ),
         );
       });
-      Overlay.of(context)!.insert(overlayEntry!);
+      Overlay.of(context).insert(overlayEntry!);
     }
   }
 
@@ -194,14 +188,14 @@ class _VoiceWidgetState extends State<VoiceWidget> {
     }
 
     if (isUp) {
-      print("取消发送");
+      debugPrint("取消发送");
     } else {
-      print("进行发送");
+      debugPrint("进行发送");
     }
   }
 
   moveVoiceView() {
-    // print(offset - start);
+    // debugPrint(offset - start);
     setState(() {
       isUp = starty - offset > 100 ? true : false;
       if (isUp) {
@@ -237,7 +231,7 @@ class _VoiceWidgetState extends State<VoiceWidget> {
           starty = details.globalPosition.dy;
           _timer = Timer.periodic(Duration(milliseconds: 1000), (t) {
             _count++;
-            print('_count is 👉 $_count');
+            debugPrint('_count is 👉 $_count');
             if (_count == _countTotal) {
               hideVoiceView();
             }

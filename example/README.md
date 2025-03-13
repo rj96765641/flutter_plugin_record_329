@@ -15,32 +15,32 @@
     recordPlugin.init()
 
 ### 2, 开始录制
-   
+
      recordPlugin.start()
 ### 3, 停止录制
      recordPlugin.stop()
 ### 4, 播放 暂停,停止播放
 #### 1,播放
-     
+
      recordPlugin.play()
-     
+
 #### 2, 暂停和继续播放
-       
+
      recordPlugin.pausePlay();
 
 #### 3, 停止播放
-    
+
      recordPlugin.stopPlay();
-      
+
 ### 3, 释放资源
 可以在页面退出的时候进行资源释放 比如在  dispose方法中调用如下代码
 
      recordPlugin.dispose()
-     
-### 4,回调监听  
-1,初始化回调监听  
 
-  
+### 4,回调监听
+1,初始化回调监听
+
+
     ///初始化方法的监听
     recordPlugin.responseFromInit.listen((data) {
       if (data) {
@@ -49,7 +49,7 @@
         print("初始化失败");
       }
     });
-    
+
 
 2,开始录制停止录制监听
 
@@ -62,7 +62,7 @@
             print("onStart --");
           }
         });
-    
+
 3,录制声音大小回调监听
 
 
@@ -94,25 +94,25 @@
     
           print("振幅大小   " + voiceData.toString() + "  " + voiceIco);
         });
-    
-     
+
+
 ## 2,录制组件的使用
 
 
 ### 1,在使用的页面进行导入package
 
-    import 'package:flutter_plugin_record/index.dart';  
-        
-    
-    
+    import 'package:flutter_plugin_record_329/index.dart';  
 
-    
+
+
+
+
 ### 2,在使用的地方引入VoiceWidget组件
-    
+
     new VoiceWidget(),
-    
-    
-    
+
+
+
 ## TODO
 
 * [x] 实现发送语音时间按下抬起时间很短提示
@@ -122,5 +122,5 @@
 
 ## 关注公众号获取更多内容
 
-  ![在这里插入图片描述](https://img-blog.csdnimg.cn/20190926100941125.jpg)
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20190926100941125.jpg)
 

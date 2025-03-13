@@ -1,174 +1,116 @@
-
 #import "DPAudioPlayer.h"
 #import <AVFoundation/AVFoundation.h>
-#import <UIKit/UIKit.h>
 
 @interface DPAudioPlayer () <AVAudioPlayerDelegate>
-{
-    BOOL isPlaying;
-}
 
 @property (nonatomic, strong) AVAudioPlayer *audioPlayer;
+@property (nonatomic, assign) BOOL isPlaying;
+@property (nonatomic, copy) NSString *currentPath;
 
 @end
 
 @implementation DPAudioPlayer
 
-static DPAudioPlayer *playerManager = nil;
-+ (DPAudioPlayer *)sharedInstance
-{
-    static dispatch_once_t onceToken;
-    
-    dispatch_once(&onceToken,^{
-        playerManager = [[DPAudioPlayer alloc] init];
-    });
-    return playerManager;
+#pragma mark - Playback Methods
+
+- (void)playRecord {
+    // 默认播放最后一次录音
+    if (self.currentPath) {
+        [self playByPath:self.currentPath type:@"file"];
+    }
 }
 
-- (instancetype)init
-{
-    if (self) {
-        //创建缓存录音文件到Tmp
-        NSString *wavPlayerFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"WAVtemporaryPlayer.wav"];
-        NSString *amrPlayerFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"AMRtemporaryPlayer.amr"];
-        
-        if (![[NSFileManager defaultManager]fileExistsAtPath:wavPlayerFilePath]) {
-            [[NSData data] writeToFile:wavPlayerFilePath atomically:YES];
-        }
-        if (![[NSFileManager defaultManager]fileExistsAtPath:amrPlayerFilePath]) {
-            [[NSData data] writeToFile:amrPlayerFilePath atomically:YES];
-        }
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(proximityStateDidChange) name:UIDeviceProximityStateDidChangeNotification object:nil];
-        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
-        [[AVAudioSession sharedInstance] setActive:YES error:nil];
-
+- (void)playByPath:(NSString *)path type:(NSString *)type {
+    if (self.isPlaying) {
+        [self stopPlay];
     }
-    return self;
-}
-
-- (void)startPlayWithData:(NSData *)data
-{
-//    if (isPlaying) return;
-    //打开红外传感器
-    [[UIDevice currentDevice] setProximityMonitoringEnabled:YES];
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    [session setActive:true error:nil];
-    [session setCategory:AVAudioSessionCategoryPlayback error:nil];
-//    //默认情况下扬声器播放
-//    AVAudioSessionPortOverride portOverride = AVAudioSessionPortOverrideNone;
-//    [[AVAudioSession sharedInstance] overrideOutputAudioPort:portOverride error:nil];
     
-    //self.audioPlayer = [[AVAudioPlayer alloc]initWithData:[self conversionAMRDataToWAVData:data] error:nil];
+    self.currentPath = path;
+    NSURL *audioURL;
     
-    if (isPlaying){
-        [self.audioPlayer stop];
-        self.audioPlayer = nil;
-        isPlaying = NO;
-    }
-    self.audioPlayer = [[AVAudioPlayer alloc]initWithData:data error:nil];
-    self.audioPlayer.meteringEnabled = YES;
-    self.audioPlayer.delegate = self;
-    self.audioPlayer.volume = 1.0;
-    self.audioPlayer.numberOfLoops = 0;
-    [self.audioPlayer prepareToPlay];
-    [self.audioPlayer play];
-    
-    if ([self.audioPlayer isPlaying]) {
-        isPlaying = YES;
-        if (self.startPlaying) {
-            self.startPlaying(YES);
-        }
+    if ([type isEqualToString:@"url"]) {
+        audioURL = [NSURL URLWithString:path];
     } else {
-        isPlaying = NO;
-        if (self.startPlaying) {
-            self.startPlaying(NO);
-        }
+        audioURL = [NSURL fileURLWithPath:path];
     }
-}
-
-//暂停播放
-- (bool)pausePlaying
-{
-    if (isPlaying){
-        //关闭红外传感器
-        [[UIDevice currentDevice] setProximityMonitoringEnabled:NO];
-        [self.audioPlayer pause];
-        isPlaying = NO;
-    }else{
-        [self.audioPlayer play];
-        isPlaying = YES;
-    }
-   
-    return isPlaying;
     
+    NSError *error;
+    self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:audioURL error:&error];
+    
+    if (error) {
+        [self sendPlayStateEvent:NO path:path error:error.localizedDescription];
+        return;
+    }
+    
+    self.audioPlayer.delegate = self;
+    
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    [[AVAudioSession sharedInstance] setActive:YES error:nil];
+    
+    if ([self.audioPlayer play]) {
+        self.isPlaying = YES;
+        [self sendPlayStateEvent:YES path:path error:nil];
+    } else {
+        [self sendPlayStateEvent:NO path:path error:@"播放启动失败"];
+    }
 }
 
+- (BOOL)pausePlay {
+    if (!self.audioPlayer) return NO;
+    
+    if (self.isPlaying) {
+        [self.audioPlayer pause];
+        self.isPlaying = NO;
+    } else {
+        [self.audioPlayer play];
+        self.isPlaying = YES;
+    }
+    
+    [self sendPlayStateEvent:self.isPlaying path:self.currentPath error:nil];
+    return self.isPlaying;
+}
 
-- (void)stopPlaying
-{
-    if (!isPlaying) return;
-    //关闭红外传感器
-    [[UIDevice currentDevice] setProximityMonitoringEnabled:NO];
+- (void)stopPlay {
+    if (!self.audioPlayer) return;
+    
     [self.audioPlayer stop];
     self.audioPlayer = nil;
-    isPlaying = NO;
+    self.isPlaying = NO;
+    [self sendPlayStateEvent:NO path:self.currentPath error:nil];
 }
 
-- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
-{
-    if (flag) {
-        [self stopPlaying];
-        if (self.playComplete) {
-            self.playComplete();
-        }
+#pragma mark - Helper Methods
+
+- (void)sendPlayStateEvent:(BOOL)isPlaying path:(NSString *)path error:(NSString *)error {
+    NSMutableDictionary *arguments = [@{
+        @"id": self.instanceId,
+        @"isPlaying": @(isPlaying),
+        @"path": path ?: @""
+    } mutableCopy];
+    
+    if (error) {
+        arguments[@"error"] = error;
     }
+    
+    [self.methodChannel invokeMethod:@"onPlayState" arguments:arguments];
 }
 
-- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer*)player error:(NSError *)error{
-    //解码错误执行的动作
-    NSLog(@"");
+#pragma mark - AVAudioPlayerDelegate
+
+- (void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
+    self.isPlaying = NO;
+    [self sendPlayStateEvent:NO path:self.currentPath error:nil];
 }
 
-//- (void)audioPlayerBeginInterruption:(AVAudioPlayer *)player
-//{
-//    isPlaying = NO;
-//    [player stop];
-//}
-
-////转换amr文件类型data为wav文件类型data
-//- (NSData *)conversionAMRDataToWAVData:(NSData *)amrData
-//{
-//    
-//    NSString *wavPlayerFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"WAVtemporaryPlayer.wav"];
-//    NSString *amrPlayerFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"AMRtemporaryPlayer.amr"];
-//    
-//    //amr的data写入文件
-//    [amrData writeToFile:amrPlayerFilePath atomically:YES];
-//    //将AMR文件转码成WAVE文件
-//    amr_file_to_wave_file([amrPlayerFilePath cStringUsingEncoding:NSUTF8StringEncoding],
-//                          [wavPlayerFilePath cStringUsingEncoding:NSUTF8StringEncoding]);
-//
-//    //得到转码后wav的data
-//    return [NSData dataWithContentsOfFile:wavPlayerFilePath];
-//}
-
-- (void)proximityStateDidChange
-{
-    if ([UIDevice currentDevice].proximityState) {
-        NSLog(@"有物品靠近");
-        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
-    } else {
-        NSLog(@"有物品离开");
-        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
-    }
+- (void)audioPlayerDecodeErrorDidOccur:(AVAudioPlayer *)player error:(NSError *)error {
+    self.isPlaying = NO;
+    [self sendPlayStateEvent:NO path:self.currentPath error:error.localizedDescription];
 }
 
+#pragma mark - Cleanup
 
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceProximityStateDidChangeNotification object:nil];
-    [[UIDevice currentDevice] setProximityMonitoringEnabled:NO];
+- (void)cleanup {
+    [self stopPlay];
 }
 
-@end
+@end 

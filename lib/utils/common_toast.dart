@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_plugin_record/widgets/custom_overlay.dart';
+import 'package:flutter_plugin_record_329/widgets/custom_overlay.dart';
 
 class CommonToast {
   static showView({
@@ -14,7 +14,7 @@ class CommonToast {
     Function? onTap,
   }) {
     OverlayEntry? overlayEntry;
-    int _count = 0;
+    int count0 = 0;
 
     void removeOverlay() {
       overlayEntry?.remove();
@@ -22,48 +22,43 @@ class CommonToast {
     }
 
     if (overlayEntry == null) {
-      overlayEntry = new OverlayEntry(builder: (content) {
-        return Container(
-          child: GestureDetector(
-            onTap: () {
-              if (onTap != null) {
-                removeOverlay();
-                onTap();
-              }
-            },
-            child: CustomOverlay(
-              icon: Column(
-                children: [
-                  Padding(
-                    child: icon,
-                    padding: const EdgeInsets.only(
-                      bottom: 10.0,
-                    ),
+      overlayEntry = OverlayEntry(builder: (content) {
+        return GestureDetector(
+          onTap: () {
+            if (onTap != null) {
+              removeOverlay();
+              onTap();
+            }
+          },
+          child: CustomOverlay(
+            icon: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 10.0,
                   ),
-                  Container(
-//                      padding: EdgeInsets.only(right: 20, left: 20, top: 0),
-                    child: Text(
-                      msg ?? '',
-                      style: style ??
-                          TextStyle(
-                            fontStyle: FontStyle.normal,
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                    ),
-                  )
-                ],
-              ),
+                  child: icon,
+                ),
+                Text(
+                  msg ?? '',
+                  style: style ??
+                      TextStyle(
+                        fontStyle: FontStyle.normal,
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                )
+              ],
             ),
           ),
         );
       });
-      Overlay.of(context!)!.insert(overlayEntry!);
+      Overlay.of(context!).insert(overlayEntry!);
       if (onTap != null) return;
       Timer.periodic(duration, (timer) {
-        _count++;
-        if (_count == count) {
-          _count = 0;
+        count0++;
+        if (count0 == count) {
+          count0 = 0;
           timer.cancel();
           removeOverlay();
         }

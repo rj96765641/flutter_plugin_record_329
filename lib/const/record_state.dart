@@ -1,17 +1,19 @@
+/// 录音状态常量类
+/// 定义了与原生平台交互的方法名常量
 class RecordState {
-  ///发送到原生端的方法名
-  static String init = "init";
-  static String start = "start";
-  static String startByWavPath = "startByWavPath";
-  static String stop = "stop";
-  static String play = "play";
-  static String playByPath = "playByPath";
+  /// 发送到原生端的方法名
+  static const String init = 'init';
+  static const String start = 'start';
+  static const String startByWavPath = 'startByWavPath';
+  static const String stop = 'stop';
+  static const String play = 'play';
+  static const String playByPath = 'playByPath';
 
-  ///原生端的回调方法名
-  static String onInit = "onInit";
-  static String onStart = "onStart";
-  static String onStop = "onStop";
-  static String onPlay = "onPlay";
-  static String onAmplitude = "onAmplitude";
-  static String onPlayState = "onPlayState";
+  /// 原生端的回调方法名
+  static const String onInit = 'onInit';
+  static const String onStart = 'onStart';
+  static const String onStop = 'onStop';
+  static const String onPlay = 'onPlay';
+  static const String onAmplitude = 'onAmplitude';
+  static const String onPlayState = 'onPlayState';
 }

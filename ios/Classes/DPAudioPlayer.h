@@ -1,39 +1,26 @@
-
 #import <Foundation/Foundation.h>
+#import <Flutter/Flutter.h>
 
-typedef void(^PlayCompleteBlock)(void);
-
-typedef void(^StartPlayingBlock)(BOOL isPlaying);
+NS_ASSUME_NONNULL_BEGIN
 
 @interface DPAudioPlayer : NSObject
 
-/**
- 播放完成回调
- */
-@property (nonatomic, copy) PlayCompleteBlock playComplete;
+/// 实例ID
+@property (nonatomic, copy) NSString *instanceId;
+/// 方法通道
+@property (nonatomic, weak) FlutterMethodChannel *methodChannel;
 
-/**
- 开始播放回调
- */
-@property (nonatomic, copy) StartPlayingBlock startPlaying;
-
-+ (DPAudioPlayer *)sharedInstance;
-
-/**
- 播放data格式录音
-
- @param data 录音data
- */
-- (void)startPlayWithData:(NSData *)data;
-
-/**
- 停止播放
- */
-- (void)stopPlaying;
-
-/// 暂停播放
-- (bool)pausePlaying;
-
-
+/// 播放录音文件
+- (void)playRecord;
+/// 通过路径播放
+- (void)playByPath:(NSString *)path type:(NSString *)type;
+/// 暂停/继续播放
+- (BOOL)pausePlay;
+/// 停止播放
+- (void)stopPlay;
+/// 清理资源
+- (void)cleanup;
 
 @end
+
+NS_ASSUME_NONNULL_END 
