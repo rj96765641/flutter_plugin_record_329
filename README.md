@@ -1,5 +1,9 @@
 # Flutter 语音录制插件 (支持 Flutter 3.29.0)
 
+原项目([flutter_plugin_record](https://github.com/yxwandroid/flutter_plugin_record))由于长时间不维护了，这里Fork 了一份修改。基于 Flutter 3.29 。 
+
+这里需要感谢 现在AI的发展，项目的改造 95% 都是 Cursor 完成。
+
 一个轻量级的 Flutter 语音录制插件，提供类似微信的语音录制功能，支持 Android 和 iOS 平台。
 
 ## ✨ 主要特性
@@ -23,7 +27,9 @@
 
 ```yaml
 dependencies:
-  flutter_plugin_record_329: ^1.0.1
+  flutter_plugin_record_329: 
+      git:
+        url: https://github.com/L-X-J/flutter_plugin_record_329.git
 ```
 
 ## 🚀 快速开始
@@ -32,7 +38,7 @@ dependencies:
 
 ```dart
 // 1. 初始化
-final recordPlugin = FlutterPluginRecord();
+final recordPlugin = FlutterPluginRecord329();
 await recordPlugin.init(); // WAV 格式
 // 或
 await recordPlugin.initRecordMp3(); // MP3 格式
@@ -101,16 +107,4 @@ MIT License
 ## 👨‍💻 贡献者
 
 感谢 [肖中旺](https://github.com/xzw421771880) 对 iOS 在线 WAV 播放的支持。
-
-## 🔗 相关项目
-
-- [Flutter 腾讯云点播播放器](https://github.com/yxwandroid/flutter_tencentplayer_plus)
-- [Flutter 二维码扫描](https://github.com/yxwandroid/flutter_plugin_qrcode)
-- [Flutter 抖音开放平台 SDK](https://github.com/yxwandroid/flutter_plugin_douyin_open)
-- [Flutter 高德地图](https://github.com/yxwandroid/flutter_amap_location)
-- [Flutter 模板工程](https://github.com/yxwandroid/flutter_app_redux)
-
-## 📱 获取更多资讯
-
-<img src="README_images/f53502b3.png" width="200" align="center" />
 
