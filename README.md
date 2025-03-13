@@ -25,12 +25,19 @@
 
 ## 📦 安装
 
-```yaml
-dependencies:
-  flutter_plugin_record_329: 
-      git:
-        url: https://github.com/L-X-J/flutter_plugin_record_329.git
-```
+1. 在 pubspec.yaml 中添加依赖
+  ```yaml
+  dependencies:
+    flutter_plugin_record_329: 
+        git:
+          url: https://github.com/L-X-J/flutter_plugin_record_329.git
+  ```
+
+2. andorid/build.gradle.kts 中增加 maven 镜像
+
+  ``` kts
+  maven("https://gitee.com/luoxuanjiang/maven_repo/raw/master")
+  ```
 
 ## 🚀 快速开始
 
